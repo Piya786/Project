@@ -70,6 +70,7 @@ ${CMAKE_CURRENT_LIST_DIR}/RicReloadSummaryCaseFeature.h
 ${CMAKE_CURRENT_LIST_DIR}/RicReloadSummaryCasesFeature.h
 ${CMAKE_CURRENT_LIST_DIR}/RicReplaceSummaryCaseFeature.h
 ${CMAKE_CURRENT_LIST_DIR}/RicFlyToObjectFeature.h
+${CMAKE_CURRENT_LIST_DIR}/RicSummaryCaseTools.h
 
 ${CMAKE_CURRENT_LIST_DIR}/RicGridStatisticsDialog.h
 ${CMAKE_CURRENT_LIST_DIR}/RicShowGridStatisticsFeature.h
@@ -153,6 +154,7 @@ ${CMAKE_CURRENT_LIST_DIR}/RicReloadCaseFeature.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RicReloadSummaryCaseFeature.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RicReplaceSummaryCaseFeature.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RicFlyToObjectFeature.cpp
+${CMAKE_CURRENT_LIST_DIR}/RicSummaryCaseTools.cpp
 
 ${CMAKE_CURRENT_LIST_DIR}/RicGridStatisticsDialog.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RicShowGridStatisticsFeature.cpp
