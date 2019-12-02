@@ -134,6 +134,9 @@ public:
     static bool        findValues     (const QList<PdmOptionItemInfo>& optionList , QVariant fieldValue, 
                                       std::vector<unsigned int>& foundIndexes);
 
+    template<typename T>
+    static PdmOptionItemInfo fromEnumClass(const QString& anOptionUiText, T aValue, bool isReadOnly = false, const QIconProvider& anIcon = QIconProvider());
+
 private:
     QString       m_optionUiText;
     QVariant      m_value;
@@ -143,6 +146,7 @@ private:
 };
 
 class PdmUiEditorHandle;
+
 //--------------------------------------------------------------------------------------------------
 /// Finds the indexes into the optionList that the field value(s) corresponds to.
 /// In the case where the field is some kind of array, several indexes might be returned
@@ -203,6 +207,15 @@ bool PdmOptionItemInfo::findValues(const QList<PdmOptionItemInfo>& optionList, Q
         }
         return (foundIndexes.size() > 0);
     }
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+template<typename T>
+PdmOptionItemInfo PdmOptionItemInfo::fromEnumClass(const QString& anOptionUiText, T aValue, bool isReadOnly /*= false*/, const QIconProvider& anIcon /*= QIconProvider()*/)
+{
+    return PdmOptionItemInfo(anOptionUiText, QVariant(static_cast<int>(aValue)), isReadOnly, anIcon);
 }
 
 //==================================================================================================
