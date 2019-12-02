@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "RimEnsembleParameterColorHandlerInterface.h"
 #include "RimViewWindow.h"
 #include "RimWellLogPlot.h"
 
@@ -39,6 +40,7 @@
 
 class RimEclipseCase;
 class RimEclipseResultCase;
+class RimRegularLegendConfig;
 class RimWellLogCurve;
 class RimWellLogFileChannel;
 class RimWellPath;
@@ -48,6 +50,7 @@ class RigEclipseCaseData;
 class RiaRftPltCurveDefinition;
 class RifDataSourceForRftPlt;
 class RifEclipseRftAddress;
+class RiuCvfOverlayItemWidget;
 
 namespace cvf
 {
@@ -63,7 +66,7 @@ class PdmOptionItemInfo;
 ///
 ///
 //==================================================================================================
-class RimWellRftPlot : public RimWellLogPlot
+class RimWellRftPlot : public RimWellLogPlot, public RimEnsembleParameterColorHandlerInterface
 {
     CAF_PDM_HEADER_INIT;
 
@@ -86,6 +89,13 @@ public:
     void deleteCurvesAssosicatedWithObservedData( const RimObservedFmuRftData* observedFmuRftData );
 
     bool showErrorBarsForObservedData() const;
+
+    ColorMode               colorMode() const override;
+    void                    setColorMode( ColorMode mode ) override;
+    void                    setEnsembleParameter( const QString& parameterName ) override;
+    void                    updateEnsembleLegendItem() override;
+    RimRegularLegendConfig* legendConfig() override;
+    QFrame*                 legendFrame() const override;
 
 protected:
     void fieldChangedByUi( const caf::PdmFieldHandle* changedField,
@@ -132,6 +142,8 @@ private:
     cvf::Color3f findCurveColor( RimWellLogCurve* curve );
     void         defineCurveColorsAndSymbols( const std::set<RiaRftPltCurveDefinition>& allCurveDefs );
 
+    std::vector<QString> allEnsembleParameters() const;
+
 private:
     caf::PdmField<QString> m_wellPathNameOrSimWellName;
     caf::PdmField<int>     m_branchIndex;
@@ -145,10 +157,15 @@ private:
 
     caf::PdmPtrField<RimWellPathCollection*> m_wellPathCollection;
 
-    caf::PdmField<bool>                 m_showPlotTitle_OBSOLETE;
-    caf::PdmChildField<RimWellLogPlot*> m_wellLogPlot_OBSOLETE;
+    caf::PdmField<ColorModeEnum>                m_ensembleColorMode;
+    caf::PdmField<QString>                      m_ensembleParameter;
+    caf::PdmChildField<RimRegularLegendConfig*> m_ensembleLegendConfig;
+    QPointer<RiuCvfOverlayItemWidget>           m_ensembleLegendFrame;
 
     std::map<RifDataSourceForRftPlt, cvf::Color3f>     m_dataSourceColors;
     std::map<QDateTime, RiuQwtSymbol::PointSymbolEnum> m_timeStepSymbols;
     bool                                               m_isOnLoad;
+
+    caf::PdmField<bool>                 m_showPlotTitle_OBSOLETE;
+    caf::PdmChildField<RimWellLogPlot*> m_wellLogPlot_OBSOLETE;
 };

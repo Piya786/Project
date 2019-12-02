@@ -851,72 +851,18 @@ void RimEnsembleCurveSet::updateCurveColors()
         if ( group && !parameterName.isEmpty() && !group->allSummaryCases().empty() )
         {
             auto ensembleParam = group->ensembleParameter( parameterName );
-
-            if ( ensembleParam.isText() )
+            if ( ensembleParam.isText() || ensembleParam.isNumeric() )
             {
-                std::set<QString> categories;
-
-                for ( auto value : ensembleParam.values )
-                {
-                    categories.insert( value.toString() );
-                }
-
-                std::vector<QString> categoryNames = std::vector<QString>( categories.begin(), categories.end() );
-                m_legendConfig->setNamedCategories( categoryNames );
-                m_legendConfig->setAutomaticRanges( 0, categoryNames.size() - 1, 0, categoryNames.size() - 1 );
-
+                RimEnsembleParameterColorHandlerInterface::initializeLegendConfig( m_legendConfig, ensembleParam );
                 for ( auto& curve : m_curves )
                 {
                     if ( curve->summaryAddressY().category() == RifEclipseSummaryAddress::SUMMARY_ENSEMBLE_STATISTICS )
                         continue;
-
-                    RimSummaryCase* rimCase = curve->summaryCaseY();
-                    QString         tValue  = rimCase->hasCaseRealizationParameters()
-                                         ? rimCase->caseRealizationParameters()->parameterValue( parameterName ).textValue()
-                                         : "";
-                    double nValue = m_legendConfig->categoryValueFromCategoryName( tValue );
-                    if ( nValue != DOUBLE_INF )
-                    {
-                        int iValue = static_cast<int>( nValue );
-                        curve->setColor( cvf::Color3f( m_legendConfig->scalarMapper()->mapToColor( iValue ) ) );
-                    }
-                    else
-                    {
-                        curve->setColor( RiaColorTables::undefinedCellColor() );
-                    }
-                    curve->updateCurveAppearance();
-                }
-            }
-            else if ( ensembleParam.isNumeric() )
-            {
-                double minValue = DOUBLE_INF;
-                double maxValue = -DOUBLE_INF;
-
-                for ( auto value : ensembleParam.values )
-                {
-                    double nValue = value.toDouble();
-                    if ( nValue != DOUBLE_INF )
-                    {
-                        if ( nValue < minValue ) minValue = nValue;
-                        if ( nValue > maxValue ) maxValue = nValue;
-                    }
-                }
-
-                m_legendConfig->setAutomaticRanges( minValue, maxValue, minValue, maxValue );
-
-                for ( auto& curve : m_curves )
-                {
-                    if ( curve->summaryAddressY().category() == RifEclipseSummaryAddress::SUMMARY_ENSEMBLE_STATISTICS )
-                        continue;
-
-                    RimSummaryCase* rimCase = curve->summaryCaseY();
-                    double          value   = rimCase->hasCaseRealizationParameters()
-                                       ? rimCase->caseRealizationParameters()->parameterValue( parameterName ).numericValue()
-                                       : DOUBLE_INF;
-                    if ( value != DOUBLE_INF )
-                        curve->setColor( cvf::Color3f( m_legendConfig->scalarMapper()->mapToColor( value ) ) );
-                    else
-                        curve->setColor( RiaColorTables::undefinedCellColor() );
+                    RimSummaryCase* rimCase    = curve->summaryCaseY();
+                    cvf::Color3f    curveColor = RimEnsembleParameterColorHandlerInterface::caseColor( m_legendConfig,
+                                                                                                    rimCase,
+                                                                                                    ensembleParam );
+                    curve->setColor( curveColor );
                     curve->updateCurveAppearance();
                 }
             }
