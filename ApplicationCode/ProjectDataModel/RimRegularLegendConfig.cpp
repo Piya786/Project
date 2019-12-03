@@ -35,6 +35,7 @@
 #include "RimIntersectionCollection.h"
 #include "RimStimPlanColors.h"
 #include "RimViewLinker.h"
+#include "RimWellRftEnsembleCurveSet.h"
 #include "RimWellRftPlot.h"
 
 #include "cafCategoryLegend.h"
@@ -924,9 +925,9 @@ QList<caf::PdmOptionItemInfo>
     RimGridCrossPlotDataSet* crossPlotCurveSet = nullptr;
     this->firstAncestorOrThisOfType( crossPlotCurveSet );
 
-    RimWellRftPlot* rftPlot = nullptr;
-    this->firstAncestorOrThisOfType( rftPlot );
-    if ( rftPlot ) hasRftPlotParent = true;
+    RimWellRftEnsembleCurveSet* rftCurveSet = nullptr;
+    this->firstAncestorOrThisOfType( rftCurveSet );
+    if ( rftCurveSet ) hasRftPlotParent = true;
 
     bool isCategoryResult = false;
     {
@@ -941,7 +942,7 @@ QList<caf::PdmOptionItemInfo>
              ( gmCellColors && gmCellColors->hasCategoryResult() ) ||
              ( eclCellEdgColors && eclCellEdgColors->hasCategoryResult() ) ||
              ( ensembleCurveSet && ensembleCurveSet->currentEnsembleParameterType() == EnsembleParameter::TYPE_TEXT ) ||
-             ( rftPlot && rftPlot->currentEnsembleParameterType() == EnsembleParameter::TYPE_TEXT ) ||
+             ( rftCurveSet && rftCurveSet->currentEnsembleParameterType() == EnsembleParameter::TYPE_TEXT ) ||
              ( crossPlotCurveSet && crossPlotCurveSet->groupingByCategoryResult() ) )
         {
             isCategoryResult = true;

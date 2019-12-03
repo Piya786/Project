@@ -44,9 +44,7 @@ public:
     virtual ColorMode               colorMode() const                                    = 0;
     virtual void                    setColorMode( ColorMode mode )                       = 0;
     virtual void                    setEnsembleParameter( const QString& parameterName ) = 0;
-    virtual void                    updateEnsembleLegendItem()                           = 0;
     virtual RimRegularLegendConfig* legendConfig()                                       = 0;
-    virtual QFrame*                 legendFrame() const                                  = 0;
     virtual EnsembleParameter::Type currentEnsembleParameterType() const                 = 0;
 
     static void initializeLegendConfig( RimRegularLegendConfig* legendConfig, const EnsembleParameter& parameter );

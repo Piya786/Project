@@ -34,6 +34,7 @@
 #include <QMetaType>
 #include <QPointer>
 
+#include "RimWellRftEnsembleCurveSet.h"
 #include <map>
 #include <set>
 #include <utility>
@@ -66,12 +67,15 @@ class PdmOptionItemInfo;
 ///
 ///
 //==================================================================================================
-class RimWellRftPlot : public RimWellLogPlot, public RimEnsembleParameterColorHandlerInterface
+class RimWellRftPlot : public RimWellLogPlot
 {
     CAF_PDM_HEADER_INIT;
 
     static const std::set<QString> PRESSURE_DATA_NAMES;
     static const char              PLOT_NAME_QFORMAT_STRING[];
+
+public:
+    using ColorMode = RimEnsembleParameterColorHandlerInterface::ColorMode;
 
 public:
     RimWellRftPlot();
@@ -89,14 +93,6 @@ public:
     void deleteCurvesAssosicatedWithObservedData( const RimObservedFmuRftData* observedFmuRftData );
 
     bool showErrorBarsForObservedData() const;
-
-    ColorMode               colorMode() const override;
-    void                    setColorMode( ColorMode mode ) override;
-    void                    setEnsembleParameter( const QString& parameterName ) override;
-    void                    updateEnsembleLegendItem() override;
-    RimRegularLegendConfig* legendConfig() override;
-    QFrame*                 legendFrame() const override;
-    EnsembleParameter::Type currentEnsembleParameterType() const override;
 
 protected:
     void fieldChangedByUi( const caf::PdmFieldHandle* changedField,
@@ -143,10 +139,13 @@ private:
     cvf::Color3f findCurveColor( RimWellLogCurve* curve );
     void         defineCurveColorsAndSymbols( const std::set<RiaRftPltCurveDefinition>& allCurveDefs );
 
-    std::vector<QString>                   allEnsembleParameters() const;
-    std::vector<RimSummaryCaseCollection*> ensembleSetsSelected() const;
+    std::vector<RimSummaryCaseCollection*> selectedEnsembles() const;
+    void                                   createEnsembleCurveSets();
+    RimWellRftEnsembleCurveSet*            findEnsembleCurveSet( RimSummaryCaseCollection* ensemble ) const;
 
 private:
+    friend class RimWellRftEnsembleCurveSet;
+
     caf::PdmField<QString> m_wellPathNameOrSimWellName;
     caf::PdmField<int>     m_branchIndex;
     caf::PdmField<bool>    m_branchDetection;
@@ -159,10 +158,8 @@ private:
 
     caf::PdmPtrField<RimWellPathCollection*> m_wellPathCollection;
 
-    caf::PdmField<ColorModeEnum>                m_ensembleColorMode;
-    caf::PdmField<QString>                      m_ensembleParameter;
-    caf::PdmChildField<RimRegularLegendConfig*> m_ensembleLegendConfig;
-    QPointer<RiuCvfOverlayItemWidget>           m_ensembleLegendFrame;
+    caf::PdmChildArrayField<RimWellRftEnsembleCurveSet*>                     m_ensembleCurveSets;
+    std::map<RimWellRftEnsembleCurveSet*, QPointer<RiuCvfOverlayItemWidget>> m_ensembleLegendFrames;
 
     std::map<RifDataSourceForRftPlt, cvf::Color3f>     m_dataSourceColors;
     std::map<QDateTime, RiuQwtSymbol::PointSymbolEnum> m_timeStepSymbols;

@@ -19,10 +19,12 @@
 #pragma once
 
 #include "RifEclipseSummaryAddress.h"
+#include "RifEclipseSummaryAddressQMetaType.h"
 #include "RifSummaryReaderInterface.h"
 
 #include "RiaDefines.h"
 
+#include "RimEnsembleParameterColorHandlerInterface.h"
 #include "RimRegularLegendConfig.h"
 #include "RimSummaryCase.h"
 #include "RimSummaryCaseCollection.h"
@@ -36,8 +38,6 @@
 #include "cafPdmPtrArrayField.h"
 #include "cafPdmPtrField.h"
 
-#include "RifEclipseSummaryAddressQMetaType.h"
-#include "RimEnsembleParameterColorHandlerInterface.h"
 #include "cafPdmProxyValueField.h"
 
 #include <QPointer>
@@ -97,11 +97,12 @@ public:
     ColorMode               colorMode() const override;
     void                    setColorMode( ColorMode mode ) override;
     void                    setEnsembleParameter( const QString& parameterName ) override;
-    void                    updateEnsembleLegendItem() override;
-    RimRegularLegendConfig* legendConfig() override;
-    QFrame*                 legendFrame() const override;
-
     EnsembleParameter::Type currentEnsembleParameterType() const override;
+
+    RimRegularLegendConfig* legendConfig() override;
+
+    void    updateEnsembleLegendItem();
+    QFrame* legendFrame() const;
 
     void updateAllCurves();
     void updateStatisticsCurves();
