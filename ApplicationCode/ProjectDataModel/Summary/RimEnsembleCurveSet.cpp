@@ -896,7 +896,7 @@ void RimEnsembleCurveSet::updateCurveColors()
         }
         else
         {
-            if ( !m_legendOverlayFrame.isNull() )
+            if ( m_legendOverlayFrame )
             {
                 plot->viewer()->removeOverlayFrame( m_legendOverlayFrame );
             }

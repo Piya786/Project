@@ -902,7 +902,8 @@ void RimWellRftPlot::fieldChangedByUi( const caf::PdmFieldHandle* changedField,
         updateFormationsOnPlot();
         syncCurvesFromUiSelection();
     }
-    else if ( changedField == &m_selectedSources || changedField == &m_selectedTimeSteps )
+    else if ( changedField == &m_selectedSources || changedField == &m_selectedTimeSteps ||
+              changedField == &m_ensembleColorMode || changedField == &m_ensembleParameter )
     {
         updateFormationsOnPlot();
         syncCurvesFromUiSelection();
@@ -926,6 +927,11 @@ void RimWellRftPlot::fieldChangedByUi( const caf::PdmFieldHandle* changedField,
 //--------------------------------------------------------------------------------------------------
 void RimWellRftPlot::defineUiTreeOrdering( caf::PdmUiTreeOrdering& uiTreeOrdering, QString uiConfigName )
 {
+    if ( !ensembleSetsSelected().empty() && m_ensembleColorMode == ColorMode::BY_ENSEMBLE_PARAM &&
+         !m_ensembleParameter().isEmpty() )
+    {
+        uiTreeOrdering.add( m_ensembleLegendConfig() );
+    }
     uiTreeOrdering.skipRemainingChildren( true );
 }
 
@@ -939,15 +945,7 @@ void RimWellRftPlot::defineUiOrdering( QString uiConfigName, caf::PdmUiOrdering&
     uiOrdering.add( &m_showEnsembleCurves );
     uiOrdering.add( &m_showErrorInObservedData );
 
-    bool ensembleDataSelected = false;
-    for ( const RifDataSourceForRftPlt& dataSource : m_selectedSources() )
-    {
-        if ( dataSource.sourceType() == RifDataSourceForRftPlt::ENSEMBLE_RFT )
-        {
-            ensembleDataSelected = true;
-            break;
-        }
-    }
+    bool ensembleDataSelected = !ensembleSetsSelected().empty();
     m_showStatisticsCurves.uiCapability()->setUiReadOnly( !ensembleDataSelected );
     m_showEnsembleCurves.uiCapability()->setUiReadOnly( !ensembleDataSelected );
 
@@ -1175,6 +1173,26 @@ QFrame* RimWellRftPlot::legendFrame() const
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
+EnsembleParameter::Type RimWellRftPlot::currentEnsembleParameterType() const
+{
+    auto ensembleSets = ensembleSetsSelected();
+    if ( m_ensembleColorMode() == ColorMode::BY_ENSEMBLE_PARAM && !ensembleSets.empty() )
+    {
+        RimSummaryCaseCollection* group         = ensembleSets.front();
+        QString                   parameterName = m_ensembleParameter();
+
+        if ( group && !parameterName.isEmpty() )
+        {
+            auto eParam = group->ensembleParameter( parameterName );
+            return eParam.type;
+        }
+    }
+    return EnsembleParameter::TYPE_NONE;
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
 void RimWellRftPlot::assignWellPathToExtractionCurves()
 {
     RimProject*  proj     = RiaApplication::instance()->project();
@@ -1290,6 +1308,12 @@ void RimWellRftPlot::defineCurveColorsAndSymbols( const std::set<RiaRftPltCurveD
     m_dataSourceColors.clear();
     m_timeStepSymbols.clear();
 
+    RimWellLogTrack* track = dynamic_cast<RimWellLogTrack*>( plotByIndex( 0 ) );
+    if ( m_ensembleLegendFrame )
+    {
+        track->viewer()->removeOverlayFrame( m_ensembleLegendFrame );
+    }
+
     std::vector<cvf::Color3f> colorTable;
     RiaColorTables::summaryCurveDefaultPaletteColors().color3fArray().toStdVector( &colorTable );
 
@@ -1322,6 +1346,18 @@ void RimWellRftPlot::defineCurveColorsAndSymbols( const std::set<RiaRftPltCurveD
         {
             auto ensembleParam = address.ensemble()->ensembleParameter( m_ensembleParameter );
             RimEnsembleParameterColorHandlerInterface::initializeLegendConfig( m_ensembleLegendConfig, ensembleParam );
+
+            if ( m_ensembleLegendConfig->showLegend() )
+            {
+                m_ensembleLegendConfig->setTitle( ensembleParam.name );
+
+                if ( !m_ensembleLegendFrame )
+                {
+                    m_ensembleLegendFrame = new RiuCvfOverlayItemWidget( track->viewer(), track->viewer()->canvas() );
+                }
+                m_ensembleLegendFrame->updateFromOverlayItem( m_ensembleLegendConfig->titledOverlayFrame() );
+                track->viewer()->addOverlayFrame( m_ensembleLegendFrame );
+            }
         }
 
         if ( address.sourceType() != RifDataSourceForRftPlt::ENSEMBLE_RFT )
@@ -1361,6 +1397,22 @@ std::vector<QString> RimWellRftPlot::allEnsembleParameters() const
         }
     }
     return std::vector<QString>( paramSet.begin(), paramSet.end() );
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+std::vector<RimSummaryCaseCollection*> RimWellRftPlot::ensembleSetsSelected() const
+{
+    std::vector<RimSummaryCaseCollection*> ensembleSets;
+    for ( const RifDataSourceForRftPlt& dataSource : m_selectedSources() )
+    {
+        if ( dataSource.sourceType() == RifDataSourceForRftPlt::ENSEMBLE_RFT )
+        {
+            ensembleSets.push_back( dataSource.ensemble() );
+        }
+    }
+    return ensembleSets;
 }
 
 //--------------------------------------------------------------------------------------------------

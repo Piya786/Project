@@ -96,6 +96,7 @@ public:
     void                    updateEnsembleLegendItem() override;
     RimRegularLegendConfig* legendConfig() override;
     QFrame*                 legendFrame() const override;
+    EnsembleParameter::Type currentEnsembleParameterType() const override;
 
 protected:
     void fieldChangedByUi( const caf::PdmFieldHandle* changedField,
@@ -142,7 +143,8 @@ private:
     cvf::Color3f findCurveColor( RimWellLogCurve* curve );
     void         defineCurveColorsAndSymbols( const std::set<RiaRftPltCurveDefinition>& allCurveDefs );
 
-    std::vector<QString> allEnsembleParameters() const;
+    std::vector<QString>                   allEnsembleParameters() const;
+    std::vector<RimSummaryCaseCollection*> ensembleSetsSelected() const;
 
 private:
     caf::PdmField<QString> m_wellPathNameOrSimWellName;

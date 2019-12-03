@@ -47,6 +47,7 @@ public:
     virtual void                    updateEnsembleLegendItem()                           = 0;
     virtual RimRegularLegendConfig* legendConfig()                                       = 0;
     virtual QFrame*                 legendFrame() const                                  = 0;
+    virtual EnsembleParameter::Type currentEnsembleParameterType() const                 = 0;
 
     static void initializeLegendConfig( RimRegularLegendConfig* legendConfig, const EnsembleParameter& parameter );
     static cvf::Color3f caseColor( const RimRegularLegendConfig* legendConfig,

@@ -101,7 +101,7 @@ public:
     RimRegularLegendConfig* legendConfig() override;
     QFrame*                 legendFrame() const override;
 
-    EnsembleParameter::Type currentEnsembleParameterType() const;
+    EnsembleParameter::Type currentEnsembleParameterType() const override;
 
     void updateAllCurves();
     void updateStatisticsCurves();
