@@ -44,6 +44,7 @@
 
 #include <QDateTime>
 
+#include "RigEclipseAllenFaultsStatCalc.h"
 #include <algorithm>
 #include <cmath>
 
@@ -421,6 +422,13 @@ size_t RigCaseCellResultsData::findOrCreateScalarResultIndex( const RigEclipseRe
                                              RigEclipseResultAddress( RiaDefines::GENERATED,
                                                                       QString( "%1K" ).arg( baseName ) ) );
         statisticsCalculator = calc;
+    }
+    else if ( resultName == RiaDefines::allCombinationsAllenResultName() ||
+              resultName == RiaDefines::binaryAllenResultName() )
+    {
+        cvf::ref<RigEclipseAllenFaultsStatCalc> calc = new RigEclipseAllenFaultsStatCalc( m_ownerMainGrid->nncData(),
+                                                                                          resVarAddr );
+        statisticsCalculator                         = calc;
     }
     else
     {
