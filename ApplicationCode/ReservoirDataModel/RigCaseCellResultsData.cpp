@@ -3002,27 +3002,93 @@ void RigCaseCellResultsData::computeAllenResults( RigCaseCellResultsData* cellRe
     mainGrid->nncData()->setEclResultAddress( RiaDefines::allCombinationsAllenResultName(), allAllenEclResAddr );
     mainGrid->nncData()->setEclResultAddress( RiaDefines::binaryAllenResultName(), binaryAllenEclResAddr );
 
-    for ( size_t i = 0; i < mainGrid->nncData()->connections().size(); i++ )
+    bool hasFormationData = cellResultsData->hasResultEntry(
+        RigEclipseResultAddress( RiaDefines::FORMATION_NAMES, RiaDefines::activeFormationNamesResultName() ) );
+
+    if ( hasFormationData )
     {
-        const auto& c = mainGrid->nncData()->connections()[i];
+        const std::vector<double>& fnData =
+            cellResultsData->cellScalarResults( RigEclipseResultAddress( RiaDefines::FORMATION_NAMES,
+                                                                         RiaDefines::activeFormationNamesResultName() ),
+                                                0 );
 
-        size_t globCellIdx1 = c.m_c1GlobIdx;
-        size_t globCellIdx2 = c.m_c2GlobIdx;
+        std::map<std::pair<int, int>, int> formationCombinationToCategory;
 
-        size_t i1, j1, k1;
-        mainGrid->ijkFromCellIndex( globCellIdx1, &i1, &j1, &k1 );
-
-        size_t i2, j2, k2;
-        mainGrid->ijkFromCellIndex( globCellIdx2, &i2, &j2, &k2 );
-
-        double binaryValue = 0.0;
-        if ( k1 != k2 )
+        for ( size_t i = 0; i < mainGrid->nncData()->connections().size(); i++ )
         {
-            binaryValue = 1.0;
-        }
+            const auto& c = mainGrid->nncData()->connections()[i];
 
-        allAllenResults[i]    = k1;
-        binaryAllenResults[i] = binaryValue;
+            size_t globCellIdx1 = c.m_c1GlobIdx;
+            size_t globCellIdx2 = c.m_c2GlobIdx;
+
+            size_t i1, j1, k1;
+            mainGrid->ijkFromCellIndex( globCellIdx1, &i1, &j1, &k1 );
+
+            int formation1 = (int)( fnData[globCellIdx1] );
+
+            size_t i2, j2, k2;
+            mainGrid->ijkFromCellIndex( globCellIdx2, &i2, &j2, &k2 );
+            int formation2 = (int)( fnData[globCellIdx2] );
+
+            int category = -1;
+            if ( formation1 != formation2 )
+            {
+                if ( formation1 < formation2 )
+                {
+                    std::swap( formation1, formation2 );
+                }
+
+                auto formationCombination = std::make_pair( formation1, formation2 );
+
+                auto existingCategory = formationCombinationToCategory.find( formationCombination );
+                if ( existingCategory != formationCombinationToCategory.end() )
+                {
+                    category = existingCategory->second;
+                }
+                else
+                {
+                    category = static_cast<int>( formationCombinationToCategory.size() );
+
+                    formationCombinationToCategory[formationCombination] = category;
+                }
+            }
+
+            if ( category < 0 )
+            {
+                binaryAllenResults[i] = 0.0;
+                allAllenResults[i]    = std::numeric_limits<double>::max();
+            }
+            else
+            {
+                binaryAllenResults[i] = 1.0;
+                allAllenResults[i]    = category;
+            }
+        }
+    }
+    else
+    {
+        for ( size_t i = 0; i < mainGrid->nncData()->connections().size(); i++ )
+        {
+            const auto& c = mainGrid->nncData()->connections()[i];
+
+            size_t globCellIdx1 = c.m_c1GlobIdx;
+            size_t globCellIdx2 = c.m_c2GlobIdx;
+
+            size_t i1, j1, k1;
+            mainGrid->ijkFromCellIndex( globCellIdx1, &i1, &j1, &k1 );
+
+            size_t i2, j2, k2;
+            mainGrid->ijkFromCellIndex( globCellIdx2, &i2, &j2, &k2 );
+
+            double binaryValue = 0.0;
+            if ( k1 != k2 )
+            {
+                binaryValue = 1.0;
+            }
+
+            allAllenResults[i]    = k1;
+            binaryAllenResults[i] = binaryValue;
+        }
     }
 }
 
