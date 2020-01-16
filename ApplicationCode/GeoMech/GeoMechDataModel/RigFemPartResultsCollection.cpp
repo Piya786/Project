@@ -1008,6 +1008,20 @@ RigFemScalarResultFrames* RigFemPartResultsCollection::calculateStressGradient( 
 
     frameCountProgress.incrementProgress();
 
+    const RigFemPart*              femPart      = m_femParts->part( partIndex );
+    int                            elementCount = femPart->elementCount();
+    const std::vector<cvf::Vec3f>& nodeCoords   = femPart->nodes().coordinates;
+
+    std::vector<cvf::Vec3i> NC( 8 );
+    NC[0] = cvf::Vec3i( -1, -1, -1 );
+    NC[1] = cvf::Vec3i( 1, -1, -1 );
+    NC[2] = cvf::Vec3i( 1, 1, -1 );
+    NC[3] = cvf::Vec3i( -1, 1, -1 );
+    NC[4] = cvf::Vec3i( -1, -1, 1 );
+    NC[5] = cvf::Vec3i( 1, -1, 1 );
+    NC[6] = cvf::Vec3i( 1, 1, 1 );
+    NC[7] = cvf::Vec3i( -1, 1, 1 );
+
     int frameCount = st11->frameCount();
     for ( int fIdx = 0; fIdx < frameCount; ++fIdx )
     {
@@ -1017,10 +1031,42 @@ RigFemScalarResultFrames* RigFemPartResultsCollection::calculateStressGradient( 
         size_t              valCount     = st11Data.size();
         dstFrameData.resize( valCount );
 
-#pragma omp parallel for
-        for ( long vIdx = 0; vIdx < static_cast<long>( valCount ); ++vIdx )
+#pragma omp parallel for schedule( dynamic )
+        for ( int elmIdx = 0; elmIdx < elementCount; ++elmIdx )
         {
-            dstFrameData[vIdx] = st11Data[vIdx];
+            const int*     cornerIndices = femPart->connectivities( elmIdx );
+            RigElementType elmType       = femPart->elementType( elmIdx );
+
+            if ( !( elmType == HEX8P || elmType == HEX8 ) ) continue;
+
+            // Find the corner coordinates for element
+            cvf::Vec3d hexCorners[8];
+            hexCorners[0] = cvf::Vec3d( nodeCoords[cornerIndices[0]] );
+            hexCorners[1] = cvf::Vec3d( nodeCoords[cornerIndices[1]] );
+            hexCorners[2] = cvf::Vec3d( nodeCoords[cornerIndices[2]] );
+            hexCorners[3] = cvf::Vec3d( nodeCoords[cornerIndices[3]] );
+            hexCorners[4] = cvf::Vec3d( nodeCoords[cornerIndices[4]] );
+            hexCorners[5] = cvf::Vec3d( nodeCoords[cornerIndices[5]] );
+            hexCorners[6] = cvf::Vec3d( nodeCoords[cornerIndices[6]] );
+            hexCorners[7] = cvf::Vec3d( nodeCoords[cornerIndices[7]] );
+
+            // Find the corresponding corner values for the element
+            std::vector<float> cornerValues( 8, 0.0 );
+
+            int elmNodeCount = RigFemTypes::elmentNodeCount( elmType );
+            for ( int elmNodIdx = 0; elmNodIdx < elmNodeCount; ++elmNodIdx )
+            {
+                size_t elmNodResIdx = femPart->elementNodeResultIdx( elmIdx, elmNodIdx );
+                int    nodeIdx      = femPart->nodeIdxFromElementNodeResultIdx( elmNodResIdx );
+
+                cornerValues[elmNodIdx] = st11Data[nodeIdx];
+            }
+
+            for ( int elmNodIdx = 0; elmNodIdx < elmNodeCount; ++elmNodIdx )
+            {
+                size_t elmNodResIdx        = femPart->elementNodeResultIdx( elmIdx, elmNodIdx );
+                dstFrameData[elmNodResIdx] = cornerValues[elmNodIdx];
+            }
         }
 
         frameCountProgress.incrementProgress();
