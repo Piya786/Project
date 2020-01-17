@@ -17,6 +17,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 #include "RimWbsParameters.h"
 
+#include "RicfCommandObject.h"
+
 #include "RigFemPartResultsCollection.h"
 #include "RigGeoMechCaseData.h"
 
@@ -33,33 +35,33 @@ RimWbsParameters::RimWbsParameters()
 {
     CAF_PDM_InitObject( "Well Bore Stability Parameters", ":/WellLogPlot16x16.png", "", "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_porePressureSource,
-                                "PorePressureSource",
-                                "Pore Pressure",
-                                "",
-                                "Data source for Pore Pressure",
-                                "" );
+    RICF_InitFieldNoDefault( &m_porePressureSource,
+                             "PorePressureSource",
+                             "Pore Pressure",
+                             "",
+                             "Data source for Pore Pressure",
+                             "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_porePressureShaleSource,
-                                "PorePressureShaleSource",
-                                "Shale Pore Pressure",
-                                "",
-                                "Data source for Pore Pressure in Shale",
-                                "" );
+    RICF_InitFieldNoDefault( &m_porePressureShaleSource,
+                             "PorePressureShaleSource",
+                             "Shale Pore Pressure",
+                             "",
+                             "Data source for Pore Pressure in Shale",
+                             "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_poissonRatioSource,
+    RICF_InitFieldNoDefault( &m_poissonRatioSource,
                                 "PoissionRatioSource",
                                 "Poisson Ratio",
                                 "",
                                 "Data source for Poisson Ratio",
                                 "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_ucsSource, "UcsSource", "Uniaxial Compressive Strength", "", "Data source for UCS", "" );
+    RICF_InitFieldNoDefault( &m_ucsSource, "UcsSource", "Uniaxial Compressive Strength", "", "Data source for UCS", "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_OBG0Source, "OBG0Source", "Initial Overburden Gradient", "", "Data source for OBG0", "" );
-    CAF_PDM_InitFieldNoDefault( &m_DFSource, "DFSource", "Depletion Factor (DF)", "", "Data source for Depletion Factor", "" );
+    RICF_InitFieldNoDefault( &m_OBG0Source, "OBG0Source", "Initial Overburden Gradient", "", "Data source for OBG0", "" );
+    RICF_InitFieldNoDefault( &m_DFSource, "DFSource", "Depletion Factor (DF)", "", "Data source for Depletion Factor", "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_K0SHSource,
+    RICF_InitFieldNoDefault( &m_K0SHSource,
                                 "K0SHSource",
                                 "K0_SH",
                                 "",
@@ -67,17 +69,17 @@ RimWbsParameters::RimWbsParameters()
                                 "(SH - PP)/(OBG-PP)",
                                 "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_FGShaleSource, "FGShaleSource", "FG in Shale Calculation", "", "", "" );
-    CAF_PDM_InitFieldNoDefault( &m_K0FGSource,
+    RICF_InitFieldNoDefault( &m_FGShaleSource, "FGShaleSource", "FG in Shale Calculation", "", "", "" );
+    RICF_InitFieldNoDefault( &m_K0FGSource,
                                 "K0FGSource",
                                 "K0_FG",
                                 "",
                                 "FG in shale = K0_FG * (OBG0-PP0)\nK0_FG = (FG-PP)/(OBG-PP)",
                                 "" );
 
-    CAF_PDM_InitField( &m_userDefinedPPShale, "UserPPShale", 1.05, "Multiplier of hydrostatic PP", "", "", "" );
+    RICF_InitField( &m_userDefinedPPShale, "UserPPShale", 1.05, "Multiplier of hydrostatic PP", "", "", "" );
 
-    CAF_PDM_InitField( &m_userDefinedPoissionRatio,
+    RICF_InitField( &m_userDefinedPoissionRatio,
                        "UserPoissionRatio",
                        0.35,
                        "User Defined Poisson Ratio",
@@ -86,12 +88,12 @@ RimWbsParameters::RimWbsParameters()
                        "" );
     // Typical UCS: http://ceae.colorado.edu/~amadei/CVEN5768/PDF/NOTES8.pdf
     // Typical UCS for Shale is 5 - 100 MPa -> 50 - 1000 bar.
-    CAF_PDM_InitField( &m_userDefinedUcs, "UserUcs", 100.0, "User Defined UCS [bar]", "", "User Defined UCS [bar]", "" );
+    RICF_InitField( &m_userDefinedUcs, "UserUcs", 100.0, "User Defined UCS [bar]", "", "User Defined UCS [bar]", "" );
 
-    CAF_PDM_InitField( &m_userDefinedDF, "UserDF", 0.7, "User Defined DF", "", "User Defined Depletion Factor", "" );
-    CAF_PDM_InitField( &m_userDefinedK0FG, "UserK0FG", 0.75, "User Defined K0_FG", "", "", "" );
-    CAF_PDM_InitField( &m_userDefinedK0SH, "UserK0SH", 0.65, "User Defined K0_SH", "", "", "" );
-    CAF_PDM_InitField( &m_FGShaleMultiplier,
+    RICF_InitField( &m_userDefinedDF, "UserDF", 0.7, "User Defined DF", "", "User Defined Depletion Factor", "" );
+    RICF_InitField( &m_userDefinedK0FG, "UserK0FG", 0.75, "User Defined K0_FG", "", "", "" );
+    RICF_InitField( &m_userDefinedK0SH, "UserK0SH", 0.65, "User Defined K0_SH", "", "", "" );
+    RICF_InitField( &m_FGShaleMultiplier,
                        "FGMultiplier",
                        1.05,
                        "SH Multiplier for FG in Shale",
