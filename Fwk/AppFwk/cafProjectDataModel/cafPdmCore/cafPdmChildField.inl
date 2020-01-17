@@ -23,6 +23,23 @@ void caf::PdmChildField<DataType*>::childObjects(std::vector<PdmObjectHandle*>* 
 /// 
 //--------------------------------------------------------------------------------------------------
 template<typename DataType >
+void caf::PdmChildField<DataType*>::setChildObject(PdmObjectHandle* object)
+{
+    if (m_fieldValue.rawPtr() != NULL)
+    {
+        PdmObjectHandle* oldObject = m_fieldValue.rawPtr();
+        this->removeChildObject(oldObject);
+        delete oldObject;
+    }
+    m_fieldValue.setRawPtr(object);
+    object->setAsParentField(this);
+}
+
+
+//--------------------------------------------------------------------------------------------------
+/// 
+//--------------------------------------------------------------------------------------------------
+template<typename DataType >
 void caf::PdmChildField<DataType*>::removeChildObject(PdmObjectHandle* object)
 {
     if (m_fieldValue.rawPtr() != NULL  && m_fieldValue.rawPtr() == object)
